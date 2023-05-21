@@ -5,4 +5,4 @@ R = eye(n);
 k = 10;
 alpha = 1; beta = 1;
 alpha = alpha/T;
-[X, L] = LR_DGI(Y, R, k, alpha, beta);
+[X, L] = GL_LRD_CVX_PQ(Y, R, k, alpha, beta);
