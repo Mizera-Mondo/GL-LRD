@@ -1,4 +1,4 @@
-function [X, L] = LR_DGI(Y, R, k, alpha, beta)
+function [X, L] = GL_LRD(Y, R, k, alpha, beta)
 %LR-DGI Solve 1/2||D(Y - X)||_F^2 + alpha*Tr{D(X)'*L*D(X)} +
 %beta/2||L||_F^2
 % k is the maximum rank of estimated signal matrix X
