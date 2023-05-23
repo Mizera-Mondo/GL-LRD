@@ -16,6 +16,7 @@ A = A + A';
 A = n*A./sum(A, 'all');
 L = diag(sum(A)) - A;
 
+tol = 1e-3;
 iter = 1;
 maxIter = 1000;
 isConverge = false;
@@ -65,7 +66,7 @@ function X = solveSubX(Y, L, R, B, alpha, k)
 D = @(X) X - R*X*B;
 tarFun = @(X) 1/2*norm(D(Y) - D(X), 'fro')^2 + alpha*trace(D(X)'*L*D(X));
 cstrFun = @(X, P, Q) norm(X - P*Q', 'fro');
-debug = true;
+debug =false;
 %%
 [n, ~] = size(Y);
 P = randn(n, k); % random initial value

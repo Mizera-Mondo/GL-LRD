@@ -21,12 +21,12 @@ while ~isAdmmConverge && ~isMaxIter
 
     cvx_begin quiet
         variable P(n, k)
-        minimize trace(Th'*(X - P*Q')) + rho/2*norm(X - P*Q', 'fro')
+        minimize trace(Th'*(X - P*Q')) + rho/2*square_pos(norm(X - P*Q', 'fro'))
     cvx_end
 
     cvx_begin quiet
         variable Q(T, k)
-        minimize trace(Th'*(X - P*Q')) + rho/2*norm(X - P*Q', 'fro')
+        minimize trace(Th'*(X - P*Q')) + rho/2*square_pos(norm(X - P*Q', 'fro'))
     cvx_end
     Th = Th + rho*(X - P*Q');
     rho = min([ita*rho, rhoMax]);

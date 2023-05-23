@@ -16,7 +16,7 @@ A = A + A';
 A = n*A./sum(A, 'all');
 L = diag(sum(A)) - A;
 
-tol = 1e-3;
+tol = 1e-2;
 iter = 1;
 maxIter = 1000;
 isConverge = false;
@@ -37,8 +37,7 @@ while ~isConverge && ~isMaxIter
     % Optimizing X
     X = solveSubX(Y, L, R, B, alpha, k);
 
-    isConverge = norm(L_old - L, 'fro')/(norm(L_old, 'fro') + 1e-10) < tol ...
-            && norm(X_old - X, 'fro')/(norm(X_old, 'fro') + 1e-10) < tol;
+    isConverge = (norm(L_old - L, 'fro')/(norm(L_old, 'fro') + 1e-10) < tol) && (norm(X_old - X, 'fro')/(norm(X_old, 'fro') + 1e-10) < tol);
     isMaxIter = iter >= maxIter;
     iter = iter + 1;
     disp(num2str(iter));
@@ -72,7 +71,7 @@ rho = 1;
 ita = 1.05;
 rhoMax = 10;
 
-tolSqu = 1e-6;
+tolSqu = 1e-4;
 tol = sqrt(tolSqu);
 maxIter = 1000;
 iter = 1;
@@ -80,7 +79,6 @@ isConverge = false;
 isMaxIter = false;
 
 while ~isConverge && ~isMaxIter
-    % Debug output
     X_old = X;
     P_old = P;
     Q_old = Q;
@@ -95,9 +93,7 @@ while ~isConverge && ~isMaxIter
     %Th = Th + rho*(X - P*Q');
     %rho = min([ita*rho, rhoMax]);
     % Terminating Condition Check
-    if norm(X_old - X, 'fro')/(norm(X_old, 'fro') + 1e-10) < tol ...
-            && norm(P_old - P, 'fro')/(norm(P_old, 'fro') + 1e-10) < tol ...
-            && norm(Q_old - Q, 'fro')/(norm(Q_old, 'fro') + 1e-10) < tol
+    if norm(X_old - X, 'fro')/(norm(X_old, 'fro') + 1e-10) < tol && norm(P_old - P, 'fro')/(norm(P_old, 'fro') + 1e-10) < tol && norm(Q_old - Q, 'fro')/(norm(Q_old, 'fro') + 1e-10) < tol
         isConverge = true;
     end
     isMaxIter = iter >= maxIter;
@@ -139,6 +135,6 @@ end
 if isArmijoNod
     X = X + deltaX;
 else
-    disp('X unchanged due to non-decreasing within tolerance.');
+%    disp('X unchanged due to non-decreasing within tolerance.');
 end
 end
