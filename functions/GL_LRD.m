@@ -1,9 +1,12 @@
 function [X, L] = GL_LRD(Y, R, k, alpha, beta)
 %LR-DGI Solve 1/2||D(Y - X)||_F^2 + alpha*Tr{D(X)'*L*D(X)} +
 %beta/2||L||_F^2
+
+global debug
+debug = true;
+
 % k is the maximum rank of estimated signal matrix X
 X = Y;
-
 
 % Random vaild initial value of A
 [n, T] = size(Y);
@@ -22,7 +25,18 @@ maxIter = 1000;
 isConverge = false;
 isMaxIter = false;
 
+if debug
+    disp('=========================================================');
+    disp('Starting Graph Learning. Low-rank decomposition involved.');
+    disp('=========================================================');
+end
+
 while ~isConverge && ~isMaxIter
+
+    if debug
+        disp(['Current Iteration: ' num2str(iter)]);
+    end
+
     L_old = L;
     X_old = X;
     % Optimizing L a.k.a. A
@@ -119,7 +133,7 @@ function X = updateX(X, Y, L, X_, R, B, alpha, rho)
 %rho/2*||X - X_||_F^2
 %
 % Where X_ = P*Q' - Th/rho
-
+debug = false;
 D = @(X) X - R*X*B;
 DY = D(Y);
 L_ = eye(size(L)) + 2*alpha*L;
@@ -147,7 +161,7 @@ while ~isArmijoNod && ~isMaxIter
 end
 if isArmijoNod
     X = X + deltaX;
-else
+elseif debug
     disp('X unchanged due to non-decreasing within tolerance.');
 end
 end

@@ -3,5 +3,11 @@ T = 200;
 Y = randn(n, T);
 R = eye(n);
 k = 30;
-[P, Q] = LRD(Y, k);
-[Pd, Qd] = LRD(Y, k - 1);
+alpha = 1; beta = 1;
+alpha = alpha/T;
+[X, L] = GL_NO_LRD(Y, R, k - 1, alpha, beta);
+disp('================================================================');
+disp('The graph learning without low-rank decomposition has converged.');
+disp('================================================================');
+
+[Xd, Ld] = GL_LRD(Y, R, k - 1, alpha, beta);

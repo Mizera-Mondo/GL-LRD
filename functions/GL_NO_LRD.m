@@ -2,6 +2,10 @@ function [X, L] = GL_NO_LRD(Y, R, k, alpha, beta)
 %LR-DGI Solve 1/2||D(Y - X)||_F^2 + alpha*Tr{D(X)'*L*D(X)} +
 %beta/2||L||_F^2
 % k is the maximum rank of estimated signal matrix X
+
+global debug;
+debug = true;
+
 X = Y;
 
 
@@ -22,7 +26,19 @@ maxIter = 1000;
 isConverge = false;
 isMaxIter = false;
 
+if debug
+    disp('=========================================================');
+    disp('Starting Graph Learning. Low-rank decomposition disabled.');
+    disp('=========================================================');
+
+end
+
 while ~isConverge && ~isMaxIter
+    
+    if debug
+        disp(['Current Iteration: ' num2str(iter)]);
+    end
+
     L_old = L;
     X_old = X;
     % Optimizing L a.k.a. A
@@ -40,7 +56,7 @@ while ~isConverge && ~isMaxIter
     isConverge = (norm(L_old - L, 'fro')/(norm(L_old, 'fro') + 1e-10) < tol) && (norm(X_old - X, 'fro')/(norm(X_old, 'fro') + 1e-10) < tol);
     isMaxIter = iter >= maxIter;
     iter = iter + 1;
-    disp(num2str(iter));
+    
 end
 end
 
@@ -63,10 +79,10 @@ function X = solveSubX(Y, L, R, B, alpha, k)
 %alpha*Tr{D(X)'*L*D(X)}, s.t. rank(X) <= k, using ADMM
 
 [n, ~] = size(Y);
-P = randn(n, k); % random initial value
-Q = (P\Y)';
+% P = randn(n, k); % random initial value
+% Q = (P\Y)';
 X = Y;
-Th = X - P*Q';
+% Th = X - P*Q';
 rho = 1;
 ita = 1.05;
 rhoMax = 10;
@@ -80,11 +96,13 @@ isMaxIter = false;
 
 while ~isConverge && ~isMaxIter
     X_old = X;
-    P_old = P;
-    Q_old = Q;
+    % P_old = P;
+    % Q_old = Q;
+
     % Update of X
-    X_ = P*Q' - Th/rho;
-    X = updateX(X, Y, L, X_, R, B, alpha, rho);
+    % X_ = P*Q' - Th/rho;
+    X = updateX(X, Y, L, R, B, alpha, rho);
+
     % Update of P
     %P = (X + 1/rho*Th)*Q/(Q'*Q);
     % Update of Q
@@ -92,8 +110,9 @@ while ~isConverge && ~isMaxIter
     % Update of Th and rho
     %Th = Th + rho*(X - P*Q');
     %rho = min([ita*rho, rhoMax]);
+
     % Terminating Condition Check
-    if norm(X_old - X, 'fro')/(norm(X_old, 'fro') + 1e-10) < tol && norm(P_old - P, 'fro')/(norm(P_old, 'fro') + 1e-10) < tol && norm(Q_old - Q, 'fro')/(norm(Q_old, 'fro') + 1e-10) < tol
+    if norm(X_old - X, 'fro')/(norm(X_old, 'fro') + 1e-10) < tol
         isConverge = true;
     end
     isMaxIter = iter >= maxIter;
@@ -101,18 +120,15 @@ while ~isConverge && ~isMaxIter
 end
 end
 
-function X = updateX(X, Y, L, X_, R, B, alpha, rho)
-%updateX solves the problem: 1/2||D(Y - X)||_F^2 + alpha*Tr{D(X)'*L*D(X)} +
-%rho/2*||X - X_||_F^2
-%
-% Where X_ = P*Q' - Th/rho
+function X = updateX(X, Y, L, R, B, alpha, rho)
+%updateX solves the problem: 1/2||D(Y - X)||_F^2 + alpha*Tr{D(X)'*L*D(X)} 
 
 D = @(X) X - R*X*B;
 DY = D(Y);
 L_ = eye(size(L)) + 2*alpha*L;
-H = DY - R'*DY*B' + rho*X_;
+H = DY - R'*DY*B';
 
-tarFun = @(X) 1/2*norm(DY - D(X), 'fro')^2 + alpha*trace(D(X)'*L*D(X)) + rho/2*norm(X - X_, 'fro');
+tarFun = @(X) 1/2*norm(DY - D(X), 'fro')^2 + alpha*trace(D(X)'*L*D(X));
 grad = @(X) L_*X + R'*L_*R*X*(B*B') - L_*R*X*B - R'*L_*X*B' + rho*X - H;
 
 % TODO: Armijo update
