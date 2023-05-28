@@ -111,30 +111,31 @@ while ~isConverge && ~isMaxIter
         disp(['Constraint Deviation at iter ' num2str(iter) ': ' num2str(cstrFun(X, P, Q))]);
     end
     X_old = X;
-    P_old = P;
-    Q_old = Q;
+
     % Update of X
     X_ = P*Q' - Th/rho;
     X = updateX(X, Y, L, X_, R, B, alpha, rho);
-    % Update of P
-    P = (X + 1/rho*Th)*Q/(xi*Ik + Q'*Q);
-    % Update of Q
-    Q = (X' + 1/rho*Th')*P/(xi*Ik + P'*P);
+
+    % Update of P, Q
+    [P, Q] = updatePQ(X, P, Q);
+
     % Update of Th and rho
     Th = Th + rho*(X - P*Q');
     rho = min([ita*rho, rhoMax]);
+
     % Terminating Condition Check
-    if norm(X_old - X, 'fro')/(norm(X_old, 'fro') + 1e-10) < tol ...
-            && norm(P_old - P, 'fro')/(norm(P_old, 'fro') + 1e-10) < tol ...
-            && norm(Q_old - Q, 'fro')/(norm(Q_old, 'fro') + 1e-10) < tol
+    if norm(X_old - X, 'fro')/(norm(X_old, 'fro') + 1e-10) < tol
         isConverge = true;
     end
+
     isMaxIter = iter >= maxIter;
     iter = iter + 1;
 end
 end
 
 function X = updateX(X, Y, L, X_, R, B, alpha, rho)
+
+
 %updateX solves the problem: 1/2||D(Y - X)||_F^2 + alpha*Tr{D(X)'*L*D(X)} +
 %rho/2*||X - X_||_F^2
 %
@@ -173,4 +174,31 @@ if isArmijoNod
 elseif debug
     disp('X unchanged due to non-decreasing within tolerance.');
 end
+end
+
+function [P, Q] = updatePQ(X, P, Q, Th, rho)
+    P_old = P;
+    Q_old = Q;
+    xi = 1;
+    tol = 1e-3;
+
+    iter = 1;
+    maxIter = 1000;
+    isMaxIter = false;
+    isConverge = false;
+    
+    while ~isMaxIter && ~isConverge
+        % Update of P
+        P = (X + 1/rho*Th)*Q/(xi*Ik + Q'*Q);
+        % Update of Q
+        Q = (X' + 1/rho*Th')*P/(xi*Ik + P'*P);
+        % Termination condition check
+        deltaP = norm(P - P_old, 'fro')/norm(P_old, 'fro');
+        deltaQ = norm(Q - Q_old, 'fro')/norm(Q_old, 'fro');
+        isConverge = deltaP < tol && delta Q < tol;
+        isMaxIter = iter >= maxIter;
+        iter = iter + 1;
+    end
+
+
 end
