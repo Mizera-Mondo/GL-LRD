@@ -7,3 +7,7 @@ since any change on X try to make this term small may greatly affect the term 1/
 
 3. There may be some bug in update of P and Q snice the process does NOT actually 
 lower the constraint X = P*Q'. This may because a too low choice of k, who knows.
+
+# TODO:
+GL_LRD_SVD.m, Solving 1/2||D(Y-X)||_F^2 + alpha*Tr{D(X)'*L*D(X)}, s.t. rank(X) <= k
+using 1-step SVD.

@@ -2,8 +2,7 @@ function [X, L] = GL_LRD_NORM_PQ(Y, R, k, alpha, beta)
 %LR-DGI Solve 1/2||D(Y - X)||_F^2 + alpha*Tr{D(X)'*L*D(X)} +
 %beta/2||L||_F^2
 
-global debug
-debug = true;
+debug = false;
 
 % k is the maximum rank of estimated signal matrix X
 X = Y;
@@ -51,8 +50,8 @@ while ~isConverge && ~isMaxIter
     % Optimizing X
     X = solveSubX(Y, L, R, B, alpha, k);
 
-    isConverge = norm(L_old - L, 'fro')/(norm(L_old, 'fro') + 1e-10) < tol ...
-            && norm(X_old - X, 'fro')/(norm(X_old, 'fro') + 1e-10) < tol;
+    isConverge = norm(L_old - L, 'fro')/norm(L_old, 'fro') < tol ...
+            && norm(X_old - X, 'fro')/norm(X_old, 'fro') < tol;
     isMaxIter = iter >= maxIter;
     iter = iter + 1;
 end
@@ -80,7 +79,7 @@ function X = solveSubX(Y, L, R, B, alpha, k)
 D = @(X) X - R*X*B;
 tarFun = @(X) 1/2*norm(D(Y) - D(X), 'fro')^2 + alpha*trace(D(X)'*L*D(X));
 cstrFun = @(X, P, Q) norm(X - P*Q', 'fro');
-global debug
+debug = false;
 
 %% Initialization
 [n, ~] = size(Y);
@@ -88,9 +87,7 @@ P = randn(n, k); % random initial value
 Q = (P\Y)';
 X = Y;
 Th = X - P*Q';
-Ik = eye(k);
 
-xi = 1;
 ita = 1.05;
 rho = 1;
 rhoMax = 10;
@@ -117,14 +114,14 @@ while ~isConverge && ~isMaxIter
     X = updateX(X, Y, L, X_, R, B, alpha, rho);
 
     % Update of P, Q
-    [P, Q] = updatePQ(X, P, Q);
+    [P, Q] = updatePQ(X, P, Q, Th, rho, k);
 
     % Update of Th and rho
     Th = Th + rho*(X - P*Q');
     rho = min([ita*rho, rhoMax]);
 
     % Terminating Condition Check
-    if norm(X_old - X, 'fro')/(norm(X_old, 'fro') + 1e-10) < tol
+    if norm(X_old - X, 'fro')/norm(X_old, 'fro') < tol
         isConverge = true;
     end
 
@@ -140,7 +137,7 @@ function X = updateX(X, Y, L, X_, R, B, alpha, rho)
 %rho/2*||X - X_||_F^2
 %
 % Where X_ = P*Q' - Th/rho
-global debug
+debug = false;
 
 %% Initialization
 D = @(X) X - R*X*B;
@@ -159,7 +156,9 @@ isArmijoNod = false;
 isMaxIter = false;
 
 gradX = grad(X);
-
+if debug
+    disp(['Armijo Target Function at iter ' num2str(iter) ': ' num2str(tarFun(X))]);
+end
 %% Iteration
 while ~isArmijoNod && ~isMaxIter
     deltaX = -1*a.^(iter)*gradX;
@@ -174,12 +173,17 @@ if isArmijoNod
 elseif debug
     disp('X unchanged due to non-decreasing within tolerance.');
 end
+
+if debug
+    disp(['Armijo Target Function at iter ' num2str(iter) ': ' num2str(tarFun(X))]);
+end
 end
 
-function [P, Q] = updatePQ(X, P, Q, Th, rho)
+function [P, Q] = updatePQ(X, P, Q, Th, rho, k)
     P_old = P;
     Q_old = Q;
-    xi = 1;
+    Ik = eye(k);
+    xi = 0.1;
     tol = 1e-3;
 
     iter = 1;
@@ -195,7 +199,7 @@ function [P, Q] = updatePQ(X, P, Q, Th, rho)
         % Termination condition check
         deltaP = norm(P - P_old, 'fro')/norm(P_old, 'fro');
         deltaQ = norm(Q - Q_old, 'fro')/norm(Q_old, 'fro');
-        isConverge = deltaP < tol && delta Q < tol;
+        isConverge = deltaP < tol && deltaQ < tol;
         isMaxIter = iter >= maxIter;
         iter = iter + 1;
     end
