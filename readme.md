@@ -9,5 +9,11 @@ since any change on X try to make this term small may greatly affect the term 1/
 lower the constraint X = P*Q'. This may because a too low choice of k, who knows.
 
 # TODO:
-GL_LRD_SVD.m, Solving 1/2||D(Y-X)||_F^2 + alpha*Tr{D(X)'*L*D(X)}, s.t. rank(X) <= k
+GL_LRD_SVD.m, Solving 
+```math
+\begin{alignat}{1}
+  &\mathrm{arg~min}~~~ &&\frac{1}{2}||D(\mathbf{Y}-\mathbf{X})||_F^2+\alpha \mathrm{Tr}\left(D(\mathbf{X})^\top*\mathbf{L}D(\mathbf{X})\right), \\
+  &\mathrm{s.t.}~~~ &&\mathrm{rank}(\mathbf{X})\leq k
+\end{alignat}
+```
 using 1-step SVD.
