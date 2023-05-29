@@ -10,7 +10,10 @@ lower the constraint X = P*Q'. This may because a too low choice of k, who knows
 
 # TODO:
 GL_LRD_SVD.m, Solving 
-
-<img src="https://render.githubusercontent.com/render/math?math=1/2||D(Y-X)||_F^2 + alpha*Tr{D(X)'*L*D(X)}, s.t. rank(X) <= k">
-
+```math
+\begin{alignat}{1}
+  &\mathrm{arg~min}~~~ &&\frac{1}{2}||D(\mathbf{Y}-\mathbf{X})||_F^2+\alpha \mathrm{Tr}\left(D(\mathbf{X})^\top*\mathbf{L}D(\mathbf{X})\right), \\
+  &\mathrm{s.t.}~~~ &&\mathrm{rank}(\mathbf{X})\leq k
+\end{alignat}
+```
 using 1-step SVD.
