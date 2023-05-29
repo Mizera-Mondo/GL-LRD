@@ -11,7 +11,6 @@ lower the constraint X = P*Q'. This may because a too low choice of k, who knows
 # TODO:
 GL_LRD_SVD.m, Solving 
 
-$$1/2||D(Y-X)||_F^2 + alpha*Tr{D(X)'*L*D(X)}$$
+<img src="https://render.githubusercontent.com/render/math?math=1/2||D(Y-X)||_F^2 + alpha*Tr{D(X)'*L*D(X)}, s.t. rank(X) <= k">
 
-, s.t. rank(X) <= k
 using 1-step SVD.
