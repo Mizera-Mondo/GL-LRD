@@ -17,3 +17,6 @@ GL_LRD_SVD.m, Solving
 \end{alignat}
 ```
 using 1-step SVD.
+
+# Failed Trial
+Adding $||\mathbf{P}||_F^2+||\mathbf{Q}||_F^2$ to update process of $\mathbf{P}, \mathbf{Q}$ did NOT help the problem of not converging caused probably by non-convexity of $||\mathbf{X}-\mathbf{P}\mathbf{Q}^\top||_F^2$. In fact, adding this normalization term will lead the optimization process to greatly oscillate while the reason is still unknown.
