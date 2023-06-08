@@ -18,6 +18,7 @@ lower the constraint X = P*Q'. This may because a too low choice of k, who knows
 ```
 ~~using 1-step SVD.~~
 
-Using Power Iteration and consider the interrelation between SVD and PCA, derive an algorithm finding k columns of $\mathbf{Q}^\top$ one by one, then calculate $\mathbf{P}$.
+~~Using Power Iteration and consider the interrelation between SVD and PCA, derive an algorithm finding k columns of $\mathbf{Q}^\top$ one by one, then calculate $\mathbf{P}$.~~
+完蛋了P = XZ这个分解从理论上就是非凸的！
 # Failed Trial
 Adding $||\mathbf{P}||_F^2+||\mathbf{Q}||_F^2$ to update process of $\mathbf{P}, \mathbf{Q}$ did NOT help the problem of not converging caused probably by non-convexity of $||\mathbf{X}-\mathbf{P}\mathbf{Q}^\top||_F^2$. In fact, adding this normalization term will lead the optimization process to greatly oscillate while the reason is still unknown.
