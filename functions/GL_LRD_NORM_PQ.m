@@ -187,7 +187,7 @@ function [P, Q] = updatePQ(X, P, Q, Th, rho, k)
     tol = 1e-3;
 
     iter = 1;
-    maxIter = 1000;
+    maxIter = 10000;
     isMaxIter = false;
     isConverge = false;
     
