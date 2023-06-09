@@ -44,6 +44,7 @@ if strcmp(options.solver, 'CVX')
 
 
 elseif strcmp(options.solver, 'quadprog')
+    error('%s is under constrution and not available yet.', options.solver);
     
 
 else
