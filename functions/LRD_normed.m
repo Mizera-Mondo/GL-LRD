@@ -17,7 +17,7 @@ tol = options.tolerance;
 [a, b] = size(X);
 P = randn(a, k);
 Q = randn(b, k);
-
+I = eye(k);
 if strcmp(options.solver, 'CVX')
     iter = 1;
     isConverge = false;
@@ -27,13 +27,13 @@ if strcmp(options.solver, 'CVX')
         Q_old = Q;
 
         cvx_begin quiet
-            variables P(a, k)
-            minimize square_pos(norm(X - P*Q', 'fro')) + ita*square_pos(norm(P, 'fro'))
+        variables P(a, k)
+        minimize square_pos(norm(X - P*Q', 'fro')) + ita*square_pos(norm(P, 'fro'))
         cvx_end
 
         cvx_begin quiet
-            variables Q(b, k)
-            minimize square_pos(norm(X - P*Q', 'fro')) + ita*square_pos(norm(Q, 'fro'))
+        variables Q(b, k)
+        minimize square_pos(norm(X - P*Q', 'fro')) + ita*square_pos(norm(Q, 'fro'))
         cvx_end
 
         isConverge = norm(P - P_old, 'fro')/norm(P_old) < tol && ...
@@ -43,9 +43,24 @@ if strcmp(options.solver, 'CVX')
     end
 
 
-elseif strcmp(options.solver, 'quadprog')
-    error('%s is under constrution and not available yet.', options.solver);
-    
+elseif strcmp(options.solver, 'closedform')
+    % error('%s is under constrution and not available yet.', options.solver);
+    iter = 1;
+    isConverge = false;
+    isMaxIter = false;
+    while ~isConverge && ~isMaxIter
+        P_old = P;
+        Q_old = Q;
+
+        P = X*Q/(ita*I + Q'*Q);
+        Q = X'*P/(ita*I + P'*P);
+
+        isConverge = norm(P - P_old, 'fro')/norm(P_old) < tol && ...
+            norm(Q - Q_old, 'fro')/norm(Q_old) < tol;
+        isMaxIter = iter >= options.maxIter;
+        iter = iter + 1;
+    end
+
 
 else
     error('%s is not a vaild solver.', options.solver);

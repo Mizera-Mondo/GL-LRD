@@ -1,6 +1,6 @@
 Ita = linspace(0.01, 1, 30);
-A = randn(10, 30);
-k = 8;
+A = randn(50, 30);
+k = 20;
 tic
 [Q, S, V] = svd(A);
 A_svd = Q(:, 1:k)*S(1:k, 1:k)*(V(:, 1:k))';
@@ -11,7 +11,7 @@ T = Err;
 parfor i = 1:30
     disp(['Starting ' num2str(i) '-th iteration']);
     tic
-    [P, Q] = LRD_normed(A, k, ita = Ita(i));
+    [P, Q] = LRD_normed(A, k, ita = Ita(i), solver = 'closedform');
     T(i) = toc;
     Err(i) = norm(A - P*Q', 'fro');
 end
