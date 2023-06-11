@@ -21,6 +21,12 @@ lower the constraint X = P*Q'. This may because a too low choice of k, who knows
 ~~Using Power Iteration and consider the interrelation between SVD and PCA, derive an algorithm finding k columns of $\mathbf{Q}^\top$ one by one, then calculate $\mathbf{P}$.~~
 
 ~~完蛋了P = XZ这个分解从理论上就是非凸的！~~
-但也没有完全完蛋, 当使用闭合解迭代求解P = XZ这个低秩分解时性能只比SVD方法差了一个数量级吧（摊手） 但确实得到了类似的结果. 等待进一步验证.
+
+但也没有完全完蛋, 当使用闭合解迭代求解P = XZ这个低秩分解时性能只比SVD方法差了一个数量级吧（摊手） 但确实得到了类似的结果. ~~等待进一步验证.~~
+
+验证完毕, 采用SVD方法而不是分解法.
+
+1. 比较SVD应用于ADMM和GPM的性能异同.
+2. 比较优化L和优化A的性能异同.
 # Failed Trial
 Adding $||\mathbf{P}||_F^2+||\mathbf{Q}||_F^2$ to update process of $\mathbf{P}, \mathbf{Q}$ did NOT help the problem of not converging caused probably by non-convexity of $||\mathbf{X}-\mathbf{P}\mathbf{Q}^\top||_F^2$. In fact, adding this normalization term will lead the optimization process to greatly oscillate while the reason is still unknown.
