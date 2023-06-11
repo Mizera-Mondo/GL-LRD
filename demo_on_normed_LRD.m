@@ -1,6 +1,6 @@
 Ita = linspace(0.01, 1, 30);
-A = randn(50, 30);
-k = 20;
+A = randn(10000, 100);
+k = 50;
 tic
 [Q, S, V] = svd(A);
 A_svd = Q(:, 1:k)*S(1:k, 1:k)*(V(:, 1:k))';
@@ -8,7 +8,7 @@ t_svd = toc;
 err_svd = norm(A - A_svd, 'fro');
 Err = zeros(size(Ita));
 T = Err;
-parfor i = 1:30
+for i = 1:30
     disp(['Starting ' num2str(i) '-th iteration']);
     tic
     [P, Q] = LRD_normed(A, k, ita = Ita(i), solver = 'closedform');
@@ -16,9 +16,9 @@ parfor i = 1:30
     Err(i) = norm(A - P*Q', 'fro');
 end
 close all
-semilogy(Ita, T);
+plot(Ita, T);
 hold on
-semilogy(Ita, t_svd*ones(1, 30));
+plot(Ita, t_svd*ones(1, 30));
 grid
 title('Time');
 legend('Normed PQ', 'SVD Baseline');
