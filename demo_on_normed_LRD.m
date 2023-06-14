@@ -1,6 +1,6 @@
 Ita = linspace(0.01, 1, 30);
-A = randn(10000, 100);
-k = 50;
+A = randn(1000, 30);
+k = 25;
 tic
 [Q, S, V] = svd(A);
 A_svd = Q(:, 1:k)*S(1:k, 1:k)*(V(:, 1:k))';

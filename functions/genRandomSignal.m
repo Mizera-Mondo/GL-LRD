@@ -1,8 +1,8 @@
 function [x, A, R] = genRandomSignal(nodeNum, usedEigNum, signalLength, noiseCov, rPerturbation)
-    A = rand_ugraph(nodeNum, nodeNum*3, 0.1, 0.1);
+    A = rand_ugraph(nodeNum, round(nodeNum^2/2*0.4), 0.1, 0.1);
     A = A./sum(A, "all").*nodeNum;
     L = diag(sum(A)) - A;
-    R = eye(nodeNum) + diag(rPerturbation*randn(nodeNum, 1));
+    R = eye(nodeNum) - diag(rPerturbation*rand(nodeNum, 1));
     
     [vec, val] = eig(L);
     [vec, val] = sortEigen(vec, val, 'descend');

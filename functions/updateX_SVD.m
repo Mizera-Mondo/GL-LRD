@@ -1,4 +1,4 @@
-function X = updateX_SVD(X, DY, L, R, B, k, options)
+function X = updateX_SVD(X, DY, L, R, B, alpha, k, options)
 %UPDATEX_SVD_PROJ Update of X in GL_LRD with SVD
 %   Default method: GPM. ADMM as an option.
 arguments
@@ -7,9 +7,10 @@ arguments
     L double
     R double
     B double
+    alpha double
     k double
     options.solver = 'GPM';
-    options.tol = 1e-3;
+    options.tol = 1e-2;
     options.maxIter = 1000;
 end
 if strcmp(options.solver, 'GPM')
@@ -35,6 +36,9 @@ if strcmp(options.solver, 'GPM')
 elseif strcmp(options.solver, 'ADMM')
     isADMMConverge = false;
     isMaxIter = false;
+
+    D = @(X) X - R*X*B;
+
     iter = 1;
     Phi = X;
     La = X - Phi;
@@ -42,7 +46,16 @@ elseif strcmp(options.solver, 'ADMM')
     while ~isADMMConverge && ~isMaxIter
         X_old = X;
         % Update of X
-        'TODO: UPDATE OF X
+        isXConverge = false;
+        while ~isXConverge
+            X_o = X;
+            targetFun = @(X) 1/2*(norm(DY - D(X), 'fro'))^2 + alpha*(trace((D(X))'*L*D(X))) + ...
+                trace(La'*(X - Phi)) + rho/2*(norm(X - Phi, 'fro'))^2;
+            gradX = @(X) 2*alpha*(L*D(X)-R*L*D(X)*B') - (DY - D(X) - R*(DY - D(X))*B') + ...
+                La + rho*(X - Phi);
+            X = lineSearchArminjo(X, gradX(X), targetFun, 1e-4, 100);
+            isXConverge = norm(X - X_o, 'fro') < 1e-3;
+        end
         % Update of Phi
         Phi = singularValueThrottling(X, k);
         % Update of Lambda
