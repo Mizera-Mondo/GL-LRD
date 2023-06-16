@@ -5,4 +5,4 @@ R = eye(n);
 k = 25;
 alpha = 1; beta = 1;
 alpha = alpha/T;
-[X, L] = GL_LRD_NORM_PQ(Y, R, k, alpha, beta);
+[X, Lest] = GL_LRD_NORM_PQ(Y, R, k, alpha, beta);

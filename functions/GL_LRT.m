@@ -1,12 +1,16 @@
-function [X, L, A] = GL_LRT(Y, R, k, alpha, beta, options)
+function [X, L, A] = GL_LRT(Y, R, k, options)
 %LR-DGI Solve 1/2||D(Y - X)||_F^2 + alpha*Tr{D(X)'*L*D(X)} +
 %beta/2||L||_F^2
 
 arguments
-    Y, R, k, alpha, beta double
+    Y, R, k double
+    options.alpha = 0.1;
+    options.beta = 0.1;
     options.LowRankApprox = true;
     options.debug = false;
 end
+alpha = options.alpha;
+beta = options.beta;
 debug = options.debug;
 
 % k is the maximum rank of estimated signal matrix X
