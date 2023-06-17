@@ -1,5 +1,5 @@
 function [x, A, R] = genRandomSignal(nodeNum, usedEigNum, signalLength, noiseCov, rPerturbation)
-    A = rand_ugraph(nodeNum, round(nodeNum^2/2*0.4), 0.1, 0.1);
+    A = rand_ugraph(nodeNum, round(nodeNum^2/2*0.2), 0.1, 0.1);
     A = A./sum(A, "all").*nodeNum;
     L = diag(sum(A)) - A;
     R = eye(nodeNum) - diag(rPerturbation*rand(nodeNum, 1));

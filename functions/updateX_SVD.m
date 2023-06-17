@@ -24,7 +24,7 @@ if strcmp(options.solver, 'GPM')
         X_old = X;
         % Linesearch, with armijo
         currentGrad = gradX(X);
-        X = lineSearchArminjo(X, currentGrad, targetFun, 1e-4, 1000);
+        X = lineSearchArminjo(X, currentGrad, targetFun, 1e-5, 1000);
         % k-rank throttling
         X = singularValueThrottling(X, k);
         % Convergence check

@@ -53,14 +53,17 @@ while ~isConverge && ~isMaxIter
     M2 = repmat(diag(M1), 1, n);
     M = M2 + M2' - 2*M1;
     M = M./T;
+    tic
     A = solveSubA(M, alpha, beta);
-
+    toc
     L = diag(sum(A)) - A;
 
     % Optimizing X
     % X = solveSubX(Y, L, R, B, alpha, k);
     if options.LowRankApprox
-        X = updateX_SVD(X, D(Y), L, R, B, alpha, k, solver = 'ADMM');
+        tic
+        X = updateX_SVD(X, D(Y), L, R, B, alpha, k, solver = 'GPM');
+        toc
     end
     
     isConverge = norm(L_old - L, 'fro')/norm(L_old, 'fro') < tol ...
