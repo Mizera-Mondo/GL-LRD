@@ -82,13 +82,16 @@ arguments
 end
 
 if strcmp(options.method, 'quadprog')
+    % DON'T USE PERSISTENT VARIABLES TO AVOID DUPLICATED LABOUR OF
+    % CONSTRUCTING TARFUN AND CONSTRS. THIS WILL CAUSE BUG SINCE CALLING
+    % THIS FUNCTION FOR ANOTHER TIME WILL NOT CLEAR THESE VARIABLES!!!
 
     [n, ~] = size(M);
     Aeq = [];
     beq = [];
     Aie = [];
     bie = [];
-    
+
     % Construct target function for vectorized A
     H = eye(n^2);
     f = alpha/beta*mat2vec(M);
