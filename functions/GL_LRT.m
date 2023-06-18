@@ -6,6 +6,7 @@ arguments
     Y, R, k double
     options.alpha = 0.1;
     options.beta = 0.1;
+    options.graphRefineMethod = 'quadprog';
     options.LowRankApprox = true;
     options.debug = false;
 end
@@ -73,152 +74,71 @@ while ~isConverge && ~isMaxIter
 end
 end
 
-function A = solveSubA(M, alpha, beta)
+function A = solveSubA(M, alpha, beta, options)
 %solveSubA solve the sub-problem ||A||_F^2 + alpha/beta*Tr{AM}
-[n, ~] = size(M);
-on = ones(n, 1);
-ze = zeros(n, 1);
-cvx_begin quiet
-    variable A(n, n) symmetric nonnegative
-    minimize square_pos(norm(A, 'fro')) + alpha/beta*trace(A*M)
-    subject to
-        diag(A) == ze;
-        on'*A*on == n;
-cvx_end
+arguments
+    M, alpha, beta double
+    options.method = 'quadprog'
 end
 
-function X = solveSubX(Y, L, R, B, alpha, k)
-%solveSubX solve the sub-problem 1/2||D(Y-X)||_F^2 +
-%alpha*Tr{D(X)'*L*D(X)}, s.t. rank(X) <= k, using ADMM
+if strcmp(options.method, 'quadprog')
 
-%% For Debugging
-D = @(X) X - R*X*B;
-tarFun = @(X) 1/2*norm(D(Y) - D(X), 'fro')^2 + alpha*trace(D(X)'*L*D(X));
-cstrFun = @(X, P, Q) norm(X - P*Q', 'fro');
-debug = false;
-
-%% Initialization
-[n, ~] = size(Y);
-P = randn(n, k); % random initial value
-Q = (P\Y)';
-X = Y;
-Th = X - P*Q';
-
-ita = 1.05;
-rho = 1;
-rhoMax = 10;
-
-tolSqu = 1e-6;
-tol = sqrt(tolSqu);
-maxIter = 1000;
-iter = 1;
-isConverge = false;
-isMaxIter = false;
-
-%% Iteration
-
-while ~isConverge && ~isMaxIter
-    % Debug output
-    if debug
-        disp(['Target Function at iter ' num2str(iter) ': ' num2str(tarFun(X))]);
-        disp(['Constraint Deviation at iter ' num2str(iter) ': ' num2str(cstrFun(X, P, Q))]);
-    end
-    X_old = X;
-
-    % Update of X
-    X_ = P*Q' - Th/rho;
-    X = updateX(X, Y, L, X_, R, B, alpha, rho);
-
-    % Update of P, Q
-    [P, Q] = updatePQ(X, P, Q, Th, rho, k);
-
-    % Update of Th and rho
-    Th = Th + rho*(X - P*Q');
-    rho = min([ita*rho, rhoMax]);
-
-    % Terminating Condition Check
-    if norm(X_old - X, 'fro')/norm(X_old, 'fro') < tol
-        isConverge = true;
-    end
-
-    isMaxIter = iter >= maxIter;
-    iter = iter + 1;
-end
-end
-
-function X = updateX(X, Y, L, X_, R, B, alpha, rho)
-
-
-%updateX solves the problem: 1/2||D(Y - X)||_F^2 + alpha*Tr{D(X)'*L*D(X)} +
-%rho/2*||X - X_||_F^2
-%
-% Where X_ = P*Q' - Th/rho
-debug = false;
-
-%% Initialization
-D = @(X) X - R*X*B;
-DY = D(Y);
-L_ = eye(size(L)) + 2*alpha*L;
-H = DY - R'*DY*B' + rho*X_;
-
-tarFun = @(X) 1/2*norm(DY - D(X), 'fro')^2 + alpha*trace(D(X)'*L*D(X)) + rho/2*norm(X - X_, 'fro');
-grad = @(X) L_*X + R'*L_*R*X*(B*B') - L_*R*X*B - R'*L_*X*B' + rho*X - H;
-
-c = 1e-2;
-a = 0.9;
-iter = 1;
-maxIter = 100;
-isArmijoNod = false;
-isMaxIter = false;
-
-gradX = grad(X);
-if debug
-    disp(['Armijo Target Function at iter ' num2str(iter) ': ' num2str(tarFun(X))]);
-end
-%% Iteration
-while ~isArmijoNod && ~isMaxIter
-    deltaX = -1*a.^(iter)*gradX;
-    expectDescent = c*trace(gradX'*deltaX);
-    realDescent = tarFun(X + deltaX) - tarFun(X);
-    isArmijoNod = realDescent < expectDescent;
-    isMaxIter = iter >= maxIter;
-    iter = iter + 1;
-end
-if isArmijoNod
-    X = X + deltaX;
-elseif debug
-    disp('X unchanged due to non-decreasing within tolerance.');
-end
-
-if debug
-    disp(['Armijo Target Function at iter ' num2str(iter) ': ' num2str(tarFun(X))]);
-end
-end
-
-function [P, Q] = updatePQ(X, P, Q, Th, rho, k)
-    P_old = P;
-    Q_old = Q;
-    Ik = eye(k);
-    xi = 0.1;
-    tol = 1e-3;
-
-    iter = 1;
-    maxIter = 10000;
-    isMaxIter = false;
-    isConverge = false;
+    [n, ~] = size(M);
+    Aeq = [];
+    beq = [];
+    Aie = [];
+    bie = [];
     
-    while ~isMaxIter && ~isConverge
-        % Update of P
-        P = (X + 1/rho*Th)*Q/(xi*Ik + Q'*Q);
-        % Update of Q
-        Q = (X' + 1/rho*Th')*P/(xi*Ik + P'*P);
-        % Termination condition check
-        deltaP = norm(P - P_old, 'fro')/norm(P_old, 'fro');
-        deltaQ = norm(Q - Q_old, 'fro')/norm(Q_old, 'fro');
-        isConverge = deltaP < tol && deltaQ < tol;
-        isMaxIter = iter >= maxIter;
-        iter = iter + 1;
+    % Construct target function for vectorized A
+    H = eye(n^2);
+    f = alpha/beta*mat2vec(M);
+
+    % Construct constraints for vectorized A
+
+    % Equality part: 1'A1 = n, A = A', Aii = 0
+    % 1'A1 = n
+    Aeq = ones(1, n^2);
+    beq = n;
+    % A = A'
+    for i = 1:n
+        for j = 1:i - 1
+            aeq = zeros(n);
+            aeq(i, j) = 1;
+            aeq(j, i) = -1;
+            Aeq = [Aeq; (mat2vec(aeq))'];
+            beq = [beq; 0];
+        end
+    end
+    % Aii = 0
+    for i = 1:n
+        aeq = zeros(n);
+        aeq(i, i) = 1;
+        Aeq = [Aeq; (mat2vec(aeq))'];
+        beq = [beq; 0];
     end
 
+    % Inequality part: Aij >= 0, i ~= j
+    Aie = -1*eye(n^2);
+    bie = zeros(n^2, 1);
+
+    A = quadprog(H, f, Aie, bie, Aeq, beq, [], [], [], optimoptions('quadprog', 'Display','off'));
+    A = vec2mat(A, n);
+
+elseif strcmp(options.method, 'CVX')
+    [n, ~] = size(M);
+    on = ones(n, 1);
+    ze = zeros(n, 1);
+    cvx_begin quiet
+        variable A(n, n) symmetric nonnegative
+        minimize square_pos(norm(A, 'fro')) + alpha/beta*trace(A*M)
+        subject to
+            diag(A) == ze;
+            on'*A*on == n;
+    cvx_end
+
+else
+    error('%s is not a vaild solver!', options.method);
+end
 
 end
+
