@@ -63,7 +63,7 @@ while ~isConverge && ~isMaxIter
     % X = solveSubX(Y, L, R, B, alpha, k);
     if options.LowRankApprox
         tic
-        X = updateX_SVD(X, D(Y), L, R, B, alpha, k, solver = 'GPM');
+        X = updateX_SVD(X, D(Y), L, R, B, alpha, k, solver = 'ADMM');
         toc
     end
     
