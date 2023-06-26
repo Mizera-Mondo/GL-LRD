@@ -57,7 +57,7 @@ elseif strcmp(options.solver, 'ADMM')
             isXConverge = norm(X - X_o, 'fro') < 1e-3;
         end
         % Update of Phi
-        Phi = singularValueThrottling(X, k);
+        Phi = singularValueThrottling(X + La/rho, k);
         % Update of Lambda
         La = La + rho*(X - Phi);
         % Convergence check
