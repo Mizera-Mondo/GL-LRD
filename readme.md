@@ -26,7 +26,9 @@ lower the constraint X = P*Q'. This may because a too low choice of k, who knows
 
 验证完毕, 采用SVD方法而不是分解法.
 
-1. 比较SVD应用于ADMM和GPM的性能异同.
-2. 比较优化L和优化A的性能异同.
+~~1. 比较SVD应用于ADMM和GPM的性能异同.~~
+~~2. 比较优化L和优化A的性能异同.~~
+性能全面落后于GL-LRSS.
+不出意外的话将停止GL-LRD的开发.
 # Failed Trial
 Adding $||\mathbf{P}||_F^2+||\mathbf{Q}||_F^2$ to update process of $\mathbf{P}, \mathbf{Q}$ did NOT help the problem of not converging caused probably by non-convexity of $||\mathbf{X}-\mathbf{P}\mathbf{Q}^\top||_F^2$. In fact, adding this normalization term will lead the optimization process to greatly oscillate while the reason is still unknown.
