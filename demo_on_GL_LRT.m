@@ -1,10 +1,10 @@
 nodeNum = 30;
-usedEigNum = 29;
+usedEigNum = 25;
 signalLength = 1000;
-noiseCov = 0;
+noiseCov = 0.1;
 rPerturbation = 0.05;
 [Y, A, R] = genRandomSignal(nodeNum, usedEigNum, signalLength, noiseCov, rPerturbation);
-[X, Lest_, Aest] = GL_LRT(Y, R, usedEigNum, alpha = 1, beta = 1, LowRankApprox = false);
+[X, Lest_, Aest] = GL_LRT(Y, R, usedEigNum, alpha = 1, beta = 5, LowRankApprox = true);
 close all
 imagesc(A); title('Ground Truth');
 figure; 
