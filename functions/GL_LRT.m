@@ -7,7 +7,7 @@ arguments
     options.alpha = 0.1;
     options.beta = 0.1;
     options.graphRefineMethod = 'quadprog';
-    options.LowRankApprox = true;
+    options.LowRankEst = true;
     options.debug = false;
 end
 alpha = options.alpha;
@@ -61,7 +61,7 @@ while ~isConverge && ~isMaxIter
 
     % Optimizing X
     % X = solveSubX(Y, L, R, B, alpha, k);
-    if options.LowRankApprox
+    if options.LowRankEst
         tic
         X = updateX_SVD(X, D(Y), L, R, B, alpha, k, solver = 'GPM');
         toc

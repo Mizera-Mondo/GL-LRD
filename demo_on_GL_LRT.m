@@ -4,7 +4,7 @@ signalLength = 1000;
 noiseCov = 0.1;
 rPerturbation = 0.05;
 [Y, A, R] = genRandomSignal(nodeNum, usedEigNum, signalLength, noiseCov, rPerturbation);
-[X, Lest_, Aest] = GL_LRT(Y, R, usedEigNum, alpha = 1, beta = 5, LowRankApprox = true);
+[X, Lest_, Aest] = GL_LRT(Y, R, usedEigNum, alpha = 1, beta = 5, LowRankEst = true);
 close all
 imagesc(A); title('Ground Truth');
 figure; 
